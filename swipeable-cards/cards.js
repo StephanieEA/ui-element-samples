@@ -100,33 +100,40 @@ class Cards {
     const isNearlyInvisible = (opacity < 0.01)
 
     if(!this.draggingCard) {
+
       if (isNearlyInvisible) {
+
+        if (!this.target || !this.target.parentNode)
+          return
         let isAfterCurrentTarget = false;
-        Array.from(this.cards).forEach(card => {
+
+        const onTransitionEnd = e => {
+          this.target = null
+          e.target.style.transition = 'none'
+          e.target.removeEventListener('transitionend', onTransitionEnd)
+        }
+
+        for (let i =0; i< this.cards.length; i++) {
+          const card = this.cards[i];
+
           if (card === this.target) {
             isAfterCurrentTarget = true;
-            return
+            continue
           }
 
           if(!isAfterCurrentTarget)
-            return
-
-          const onTransitionEnd = _ => {
-            this.target = null
-            card.removeEventListener('transitionend', onTransitionEnd)
-          }
+            continue
 
           card.style.transform = `translateY(${this.targetBCR.height + 20}px)`;
           requestAnimationFrame(_ => {
-            card.style.transition = `transform 3s cubic-bezier(0,0,0.31,1)`
+            card.style.transition = `transform 0.15s cubic-bezier(0,0,0.31,1)`
             card.style.transform = 'none'
           })
 
           card.addEventListener('transitionend', onTransitionEnd);
-        })
-        if (this.target && this.target.parentNode)
+        }
+
         this.target.parentNode.removeChild(this.target)
-      }
 
       if (isNearlyAtStart) {
         this.target.style.willChange = 'initial'
@@ -137,6 +144,7 @@ class Cards {
       if (this.draggingCard)
         return;
       }
+    }
   }
 }
 
